@@ -2,9 +2,9 @@
 
 namespace DigitalCreative\InlineMorphTo;
 
-use Laravel\Nova\Nova;
-use Laravel\Nova\Events\ServingNova;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Nova\Events\ServingNova;
+use Laravel\Nova\Nova;
 
 class FieldServiceProvider extends ServiceProvider
 {
@@ -16,8 +16,7 @@ class FieldServiceProvider extends ServiceProvider
     public function boot()
     {
         Nova::serving(function (ServingNova $event) {
-            Nova::script('inline-morph-to', __DIR__.'/../dist/js/field.js');
-            Nova::style('inline-morph-to', __DIR__.'/../dist/css/field.css');
+            Nova::script('inline-morph-to', __DIR__ . '/../dist/js/field.js');
         });
     }
 
