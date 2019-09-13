@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\MorphOne;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
 use ReflectionClass;
@@ -36,7 +37,8 @@ class InlineMorphTo extends Field
         parent::__construct($name, $attribute, $resolveCallback);
 
         $this->meta = [
-            'resources' => []
+            'resources' => [],
+            'listable' => true
         ];
 
     }
@@ -99,14 +101,24 @@ class InlineMorphTo extends Field
         if ($relationInstance = $resource->$attribute) {
 
             $fields = $this->getFields($relationInstance);
+            $resource = Nova::resourceForModel($relationInstance);
 
             foreach ($fields as $field) {
+
+                if ($field instanceof MorphOne) {
+
+                    $field->meta[ 'inlineMorphTo' ] = [
+                        'viaResourceId' => $relationInstance->id,
+                        'viaResource' => $resource::uriKey()
+                    ];
+
+                }
 
                 $field->resolve($relationInstance);
 
             }
 
-            return Nova::resourceForModel($relationInstance);
+            return $resource;
 
         }
 
