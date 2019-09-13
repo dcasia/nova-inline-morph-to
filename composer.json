@@ -1,6 +1,6 @@
 {
     "name": "digital-creative/inline-morph-to",
-    "description": "A Laravel Nova field.",
+    "description": "A Laravel Nova field for displaying morphTo relationship inline.",
     "keywords": [
         "laravel",
         "nova"
