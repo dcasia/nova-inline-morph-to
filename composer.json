@@ -3,7 +3,11 @@
     "description": "A Laravel Nova field for displaying morphTo relationship inline.",
     "keywords": [
         "laravel",
-        "nova"
+        "nova",
+        "field",
+        "morph",
+        "morphTo",
+        "inline"
     ],
     "authors": [
         {
