@@ -2,9 +2,9 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/digital-creative/nova-inline-morph-to.svg)](https://packagist.org/packages/digital-creative/nova-inline-morph-to)
 [![Total Downloads](https://img.shields.io/packagist/dt/digital-creative/nova-inline-morph-to.svg)](https://packagist.org/packages/digital-creative/nova-inline-morph-to)
-[![License](https://img.shields.io/packagist/l/digital-creative/nova-inline-morph-to.svg)](https://github.com/digital-creative/nova-inline-morph-to/blob/master/LICENSE)
+[![License](https://img.shields.io/packagist/l/digital-creative/nova-inline-morph-to.svg)](https://raw.githubusercontent.com/dcasia/nova-inline-morph-to/master/LICENSE)
 
-![Laravel Nova Inline MorphTo Field in action](https://github.com/dcasia/nova-inline-morph-to/raw/master/demo.gif)
+![Laravel Nova Inline MorphTo Field in action](https://raw.githubusercontent.com/dcasia/nova-inline-morph-to/master/demo.gif)
 
 ### Install
 
@@ -43,4 +43,4 @@ class Article extends Resource
 
 ## License
 
-The MIT License (MIT). Please see [License File](https://github.com/dcasia/nova-inline-morph-to/raw/master/LICENSE) for more information.
+The MIT License (MIT). Please see [License File](https://raw.githubusercontent.com/dcasia/nova-inline-morph-to/master/LICENSE) for more information.
