@@ -2,6 +2,7 @@
 
 namespace DigitalCreative\InlineMorphTo;
 
+use App\Nova\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -72,7 +73,7 @@ class InlineMorphTo extends Field
 
         });
 
-        $this->withMeta([ 'resources' => $types ]);
+        $this->withMeta([ 'resources' => $types->values() ]);
 
         return $this;
 
@@ -94,8 +95,8 @@ class InlineMorphTo extends Field
     protected function resolveAttribute($resource, $attribute)
     {
         /**
-         * @var null|\Illuminate\Database\Eloquent\Model $relationInstance
-         * @var \Laravel\Nova\Fields\Field $field
+         * @var null|Model $relationInstance
+         * @var Field $field
          */
 
         if ($relationInstance = $resource->$attribute) {
@@ -128,10 +129,10 @@ class InlineMorphTo extends Field
     {
 
         /**
-         * @var \Illuminate\Database\Eloquent\Model $relatedInstance
-         * @var \Illuminate\Database\Eloquent\Model $model
-         * @var \App\Nova\Resource $resource
-         * @var \Laravel\Nova\Fields\Field $field
+         * @var Model $relatedInstance
+         * @var Model $model
+         * @var Resource $resource
+         * @var Field $field
          */
 
         $resourceClass = $request->input($this->attribute);

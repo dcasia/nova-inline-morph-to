@@ -3,6 +3,7 @@
 namespace DigitalCreative\InlineMorphTo;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
 
@@ -11,9 +12,9 @@ trait HasInlineMorphToFields
     /**
      * Resolve the index fields.
      *
-     * @param \Laravel\Nova\Http\Requests\NovaRequest $request
+     * @param NovaRequest $request
      *
-     * @return \Illuminate\Support\Collection
+     * @return Collection
      */
     public function detailFields(NovaRequest $request)
     {
