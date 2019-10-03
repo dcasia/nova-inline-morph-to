@@ -65,6 +65,7 @@ class InlineMorphTo extends Field
 
             return [
                 'className' => $resource,
+                'uriKey' => $resource::uriKey(),
                 'label' => $useKeysAsLabel ? $key : $this->convertToHumanCase($resource),
                 'fields' => collect($fields)->reject(function ($field) {
                     return $field instanceof ID;

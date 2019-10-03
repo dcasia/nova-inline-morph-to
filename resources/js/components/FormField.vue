@@ -39,8 +39,7 @@
             <div v-for="resourceField in resource.fields">
 
                 <component :is="`form-${ resourceField.component }`"
-                           :resource-id="resourceId"
-                           :resource-name="resourceName"
+                           :resource-name="resource.uriKey"
                            :field="resourceField"
                            :errors="errors"/>
 
