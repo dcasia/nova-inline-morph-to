@@ -17,9 +17,13 @@ composer require digital-creative/nova-inline-morph-to
 The signature is the same as the default `MorphTo` field that ships with Nova.
 
 ```php
+
+use DigitalCreative\InlineMorphTo\InlineMorphTo;
+use DigitalCreative\InlineMorphTo\HasInlineMorphToFields;
+
 class Article extends Resource
 {
-    use HasInlineMorphTo;
+    use HasInlineMorphToFields;
 
     public function fields(Request $request)
     {
@@ -39,7 +43,7 @@ class Article extends Resource
 }
 ```
 
-**_Note:_** You will need to import the `HasInlineMorphTo` trait for this field to display correctly within resource detail views. 
+**_Note:_** You will need to import the `HasInlineMorphToFields` trait for this field to display correctly within resource detail views. 
 
 ## License
 
