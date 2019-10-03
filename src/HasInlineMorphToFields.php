@@ -19,7 +19,7 @@ trait HasInlineMorphToFields
     public function detailFields(NovaRequest $request)
     {
 
-        return tap(parent::indexFields($request)->flatten())->each(function ($field) {
+        return tap(parent::detailFields($request)->flatten())->each(function ($field) {
 
             if ($field instanceof InlineMorphTo) {
 
