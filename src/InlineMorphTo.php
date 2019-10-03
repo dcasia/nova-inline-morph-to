@@ -11,6 +11,7 @@ use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\HasOne;
+use Laravel\Nova\Http\Controllers\CreationFieldController;
 use Laravel\Nova\Http\Controllers\ResourceIndexController;
 use Laravel\Nova\Http\Controllers\ResourceShowController;
 use Laravel\Nova\Http\Controllers\UpdateFieldController;
@@ -95,21 +96,19 @@ class InlineMorphTo extends Field
         $request = app(NovaRequest::class);
         $controller = $request->route()->controller;
 
-        if ($controller instanceof UpdateFieldController) {
+        switch (get_class($controller)) {
 
-            return $resourceInstance->updateFields($request);
+            case CreationFieldController::class :
+                return $resourceInstance->creationFields($request);
 
-        }
+            case UpdateFieldController::class :
+                return $resourceInstance->updateFields($request);
 
-        if ($controller instanceof ResourceShowController) {
+            case ResourceShowController::class :
+                return $resourceInstance->detailFields($request);
 
-            return $resourceInstance->detailFields($request);
-
-        }
-
-        if ($controller instanceof ResourceIndexController) {
-
-            return $resourceInstance->indexFields($request);
+            case ResourceIndexController::class :
+                return $resourceInstance->indexFields($request);
 
         }
 
@@ -220,11 +219,11 @@ class InlineMorphTo extends Field
         $originalResource = $request->route()->resource;
 
         /**
-         * Temporarily remap the route resource key so every sub field thinks it's being resolved by it's original parent
+         * Temporarily remap the route resource key so every sub field thinks its being resolved by its original parent
          */
         foreach ($this->meta[ 'resources' ] as $resource) {
 
-            $resource[ 'fields' ] = $resource[ 'fields' ]->transform(function (&$field) use ($request, $resource) {
+            $resource[ 'fields' ] = $resource[ 'fields' ]->transform(function ($field) use ($request, $resource) {
 
                 $request->route()->setParameter('resource', $resource[ 'uriKey' ]);
 
