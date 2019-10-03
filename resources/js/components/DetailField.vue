@@ -4,15 +4,20 @@
 
         <panel :panel="{ name: field.value, fields: standardFields }"/>
 
-        <resource-index v-for="(hasOneField, index) of hasOneFields"
-                        :key="index"
-                        :field="hasOneField"
-                        :resource-name="hasOneField.resourceName"
-                        :via-resource="hasOneField.inlineMorphTo.viaResource"
-                        :via-resource-id="hasOneField.inlineMorphTo.viaResourceId"
-                        :via-relationship="hasOneField.hasOneRelationship"
-                        :relationship-type="'hasOne'"
-                        :load-cards="false"/>
+        <template v-for="({type, fields}) of relationalFields">
+
+            <resource-index v-for="(relationField, index) of fields"
+                            :key="index"
+                            :field="relationField"
+                            :resource-name="relationField.resourceName"
+                            :via-resource="relationField.inlineMorphTo.viaResource"
+                            :via-resource-id="relationField.inlineMorphTo.viaResourceId"
+                            :via-relationship="relationField[`${type}Relationship`]"
+                            :relationship-type="type"
+                            :load-cards="false"
+                            class="mb-6"/>
+
+        </template>
 
     </div>
 
@@ -26,14 +31,27 @@
         props: ['resource', 'resourceName', 'resourceId', 'field'],
         mixins: [ReplaceValueWithLabel],
         computed: {
-            hasOneFields() {
+            relationalFields() {
 
-                return this.fields.filter(field => field.component === 'has-one-field')
+                return [
+                    {
+                        type: 'hasOne',
+                        fields: this.fields.filter(field => field.component === 'has-one-field')
+                    },
+                    {
+                        type: 'hasMany',
+                        fields: this.fields.filter(field => field.component === 'has-many-field')
+                    },
+                    {
+                        type: 'belongsToMany',
+                        fields: this.fields.filter(field => field.component === 'belongs-to-many-field')
+                    }
+                ]
 
             },
             standardFields() {
 
-                return this.fields.filter(field => field.component !== 'has-one-field')
+                return this.fields.filter(field => !['has-one-field', 'has-many-field', 'belongs-to-many-field'].includes(field.component))
 
             },
             fields() {

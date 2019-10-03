@@ -5,10 +5,15 @@ namespace DigitalCreative\InlineMorphTo;
 use App\Nova\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Field;
-use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\MorphOne;
+use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\HasOne;
+use Laravel\Nova\Http\Controllers\ResourceIndexController;
+use Laravel\Nova\Http\Controllers\ResourceShowController;
+use Laravel\Nova\Http\Controllers\UpdateFieldController;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
 use ReflectionClass;
@@ -61,15 +66,16 @@ class InlineMorphTo extends Field
 
         $types = collect($types)->map(function (string $resource, $key) use ($useKeysAsLabel) {
 
-            $fields = (new $resource($resource::newModel()))->fields(app(NovaRequest::class));
+            /**
+             * @var Resource $resourceInstance
+             */
+            $resourceInstance = new $resource($resource::newModel());
 
             return [
                 'className' => $resource,
                 'uriKey' => $resource::uriKey(),
                 'label' => $useKeysAsLabel ? $key : $this->convertToHumanCase($resource),
-                'fields' => collect($fields)->reject(function ($field) {
-                    return $field instanceof ID;
-                })->toArray()
+                'fields' => $this->resolveFields($resourceInstance)
             ];
 
         });
@@ -77,6 +83,37 @@ class InlineMorphTo extends Field
         $this->withMeta([ 'resources' => $types->values() ]);
 
         return $this;
+
+    }
+
+    private function resolveFields(Resource $resourceInstance): Collection
+    {
+
+        /**
+         * @var NovaRequest $request
+         */
+        $request = app(NovaRequest::class);
+        $controller = $request->route()->controller;
+
+        if ($controller instanceof UpdateFieldController) {
+
+            return $resourceInstance->updateFields($request);
+
+        }
+
+        if ($controller instanceof ResourceShowController) {
+
+            return $resourceInstance->detailFields($request);
+
+        }
+
+        if ($controller instanceof ResourceIndexController) {
+
+            return $resourceInstance->indexFields($request);
+
+        }
+
+        return $resourceInstance->availableFields($request);
 
     }
 
@@ -107,7 +144,9 @@ class InlineMorphTo extends Field
 
             foreach ($fields as $field) {
 
-                if ($field instanceof MorphOne) {
+                if ($field instanceof HasOne ||
+                    $field instanceof HasMany ||
+                    $field instanceof BelongsToMany) {
 
                     $field->meta[ 'inlineMorphTo' ] = [
                         'viaResourceId' => $relationInstance->id,
@@ -164,11 +203,41 @@ class InlineMorphTo extends Field
 
     }
 
-    private function getFields(Model $model): array
+    private function getFields(Model $model): Collection
     {
         $resourceClass = Nova::resourceForModel($model);
 
         return $this->meta[ 'resources' ]->where('className', $resourceClass)->first()[ 'fields' ];
+    }
+
+    public function jsonSerialize()
+    {
+
+        /**
+         * @var NovaRequest $request
+         */
+        $request = app(NovaRequest::class);
+        $originalResource = $request->route()->resource;
+
+        /**
+         * Temporarily remap the route resource key so every sub field thinks it's being resolved by it's original parent
+         */
+        foreach ($this->meta[ 'resources' ] as $resource) {
+
+            $resource[ 'fields' ] = $resource[ 'fields' ]->transform(function (&$field) use ($request, $resource) {
+
+                $request->route()->setParameter('resource', $resource[ 'uriKey' ]);
+
+                return $field->jsonSerialize();
+
+            });
+
+        }
+
+        $request->route()->setParameter('resource', $originalResource);
+
+        return parent::jsonSerialize();
+
     }
 
 }
