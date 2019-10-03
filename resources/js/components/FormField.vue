@@ -12,7 +12,7 @@
                         class="w-full form-control form-select"
                         :class="errorClasses">
 
-                    <option selected disabled>
+                    <option selected disabled :value="null">
                         {{__('Choose an option')}}
                     </option>
 
