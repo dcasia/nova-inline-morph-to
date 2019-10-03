@@ -82,6 +82,11 @@ class InlineMorphTo extends Field
 
     }
 
+    public function default(string $resource): self
+    {
+        return $this->withMeta([ 'default' => $resource ]);
+    }
+
     private function resolveFields(Resource $resourceInstance): Collection
     {
 
