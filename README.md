@@ -17,7 +17,6 @@ composer require digital-creative/nova-inline-morph-to
 The signature is the same as the default `MorphTo` field that ships with Nova.
 
 ```php
-
 use DigitalCreative\InlineMorphTo\InlineMorphTo;
 use DigitalCreative\InlineMorphTo\HasInlineMorphToFields;
 

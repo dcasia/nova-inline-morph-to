@@ -4,9 +4,7 @@ namespace DigitalCreative\InlineMorphTo;
 
 use App\Nova\Resource;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\HasMany;
@@ -17,7 +15,6 @@ use Laravel\Nova\Http\Controllers\ResourceShowController;
 use Laravel\Nova\Http\Controllers\UpdateFieldController;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Nova;
-use ReflectionClass;
 
 class InlineMorphTo extends Field
 {
@@ -63,9 +60,7 @@ class InlineMorphTo extends Field
     public function types(array $types): self
     {
 
-        $useKeysAsLabel = Arr::isAssoc($types);
-
-        $types = collect($types)->map(function (string $resource, $key) use ($useKeysAsLabel) {
+        $types = collect($types)->map(function (string $resource, $key) {
 
             /**
              * @var Resource $resourceInstance
@@ -75,7 +70,7 @@ class InlineMorphTo extends Field
             return [
                 'className' => $resource,
                 'uriKey' => $resource::uriKey(),
-                'label' => $useKeysAsLabel ? $key : $this->convertToHumanCase($resource),
+                'label' => is_numeric($key) ? $resource::label() : $key,
                 'fields' => $this->resolveFields($resourceInstance)
             ];
 
@@ -114,11 +109,6 @@ class InlineMorphTo extends Field
 
         return $resourceInstance->availableFields($request);
 
-    }
-
-    private function convertToHumanCase(string $resource): string
-    {
-        return Str::title(str_replace('_', ' ', Str::snake((new ReflectionClass($resource))->getShortName())));
     }
 
     /**
