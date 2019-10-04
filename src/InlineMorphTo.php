@@ -117,6 +117,66 @@ class InlineMorphTo extends Field
     }
 
     /**
+     * Resolve the field's value for display.
+     *
+     * @param mixed $resource
+     * @param string|null $attribute
+     * @return void
+     */
+    public function resolveForDisplay($resource, $attribute = null)
+    {
+
+        /**
+         * @var null|Model $relationInstance
+         * @var Field $field
+         */
+        $attribute = $attribute ?? $this->attribute;
+
+        parent::resolveForDisplay($resource, $attribute);
+
+        if ($relationInstance = $resource->$attribute) {
+
+            foreach ($this->getFields($relationInstance) as $field) {
+
+                $field->resolveForDisplay($relationInstance);
+
+            }
+
+        }
+
+    }
+
+    /**
+     * Resolve the field's value.
+     *
+     * @param mixed $resource
+     * @param string|null $attribute
+     * @return void
+     */
+    public function resolve($resource, $attribute = null)
+    {
+
+        /**
+         * @var null|Model $relationInstance
+         * @var Field $field
+         */
+        $attribute = $attribute ?? $this->attribute;
+
+        parent::resolve($resource, $attribute);
+
+        if ($relationInstance = $resource->$attribute) {
+
+            foreach ($this->getFields($relationInstance) as $field) {
+
+                $field->resolve($relationInstance);
+
+            }
+
+        }
+
+    }
+
+    /**
      * Resolve the given attribute from the given resource.
      *
      * @param mixed $resource
@@ -133,10 +193,9 @@ class InlineMorphTo extends Field
 
         if ($relationInstance = $resource->$attribute) {
 
-            $fields = $this->getFields($relationInstance);
             $resource = Nova::resourceForModel($relationInstance);
 
-            foreach ($fields as $field) {
+            foreach ($this->getFields($relationInstance) as $field) {
 
                 if ($field instanceof HasOne ||
                     $field instanceof HasMany ||
@@ -148,8 +207,6 @@ class InlineMorphTo extends Field
                     ];
 
                 }
-
-                $field->resolve($relationInstance);
 
             }
 
