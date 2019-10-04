@@ -35,7 +35,7 @@ class Article extends Resource
                              \App\Nova\Text::class,
                              \App\Nova\Gallery::class,
                          ])
-                        ->default(\App\Nova\Text::class),
+                         ->default(\App\Nova\Text::class),
             ...
         ];
 
