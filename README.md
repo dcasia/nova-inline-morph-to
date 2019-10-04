@@ -42,7 +42,11 @@ class Article extends Resource
 }
 ```
 
-**_Note:_** You will need to import the `HasInlineMorphToFields` trait for this field to display correctly within resource detail views. 
+**_Note:_** You will need to import the `HasInlineMorphToFields` trait for this field to display correctly within resource detail views.
+
+**_Code example_**: 
+adding morphables dynamically from a directory
+https://github.com/dcasia/nova-inline-morph-to/issues/4
 
 ## License
 
