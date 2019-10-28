@@ -168,6 +168,14 @@ class InlineMorphTo extends Field
 
             foreach ($this->getFields($relationInstance) as $field) {
 
+                if ($field->computed()) {
+
+                    $field->computedCallback = $field->computedCallback->bindTo(
+                        Nova::newResourceFromModel($relationInstance)
+                    );
+
+                }
+
                 $field->resolve($relationInstance);
 
             }
