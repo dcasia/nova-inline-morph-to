@@ -249,16 +249,31 @@ class InlineMorphTo extends Field
         }
 
         $fields = $this->getFields($relatedInstance);
+        $callbacks = [];
 
         foreach ($fields as $field) {
 
-            $field->fill($request, $relatedInstance);
+            $callbacks[] = $field->fill($request, $relatedInstance);
 
         }
 
         $relatedInstance->saveOrFail();
 
         $model->{$this->attribute}()->associate($relatedInstance);
+
+        return function () use ($callbacks) {
+
+            foreach ($callbacks as $callback) {
+
+                if (is_callable($callback)) {
+
+                    call_user_func($callback);
+
+                }
+
+            }
+
+        };
 
     }
 
