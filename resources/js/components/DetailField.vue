@@ -2,7 +2,7 @@
 
     <div>
 
-        <panel :panel="{ name: field.value, fields: standardFields }"/>
+        <panel :panel="{ name: label, fields: standardFields }"/>
 
         <template v-for="({type, fields}) of relationalFields">
 
@@ -28,8 +28,8 @@
     import ReplaceValueWithLabel from '../ReplaceValueWithLabel'
 
     export default {
-        props: ['resource', 'resourceName', 'resourceId', 'field'],
-        mixins: [ReplaceValueWithLabel],
+        props: [ 'resource', 'resourceName', 'resourceId', 'field' ],
+        mixins: [ ReplaceValueWithLabel ],
         computed: {
             relationalFields() {
 
@@ -51,7 +51,7 @@
             },
             standardFields() {
 
-                return this.fields.filter(field => !['has-one-field', 'has-many-field', 'belongs-to-many-field'].includes(field.component))
+                return this.fields.filter(field => ![ 'has-one-field', 'has-many-field', 'belongs-to-many-field' ].includes(field.component))
 
             },
             fields() {

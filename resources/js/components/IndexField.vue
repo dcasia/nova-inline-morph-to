@@ -1,5 +1,5 @@
 <template>
-    <span>{{ field.value }}</span>
+    <span>{{ label }}</span>
 </template>
 
 <script>
@@ -7,8 +7,8 @@
     import ReplaceValueWithLabel from '../ReplaceValueWithLabel'
 
     export default {
-        props: ['resourceName', 'field'],
-        mixins: [ReplaceValueWithLabel]
+        props: [ 'resourceName', 'field' ],
+        mixins: [ ReplaceValueWithLabel ]
     }
 
 </script>

@@ -53,27 +53,22 @@
 
 <script>
 
-    import {FormField, HandlesValidationErrors} from 'laravel-nova'
+    import { FormField, HandlesValidationErrors } from 'laravel-nova'
 
     export default {
-        mixins: [FormField, HandlesValidationErrors],
-
-        props: ['resourceName', 'resourceId', 'field'],
-
+        mixins: [ FormField, HandlesValidationErrors ],
+        props: [ 'resourceName', 'resourceId', 'field' ],
         computed: {
-
             shouldDisableTypeSelect() {
                 return this.resourceId
             }
-
         },
-
         methods: {
             /*
              * Set the initial, internal value for the field.
              */
             setInitialValue() {
-                this.value = this.field.value || this.field.default
+                this.value = this.field.value || this.field.default || null
             },
 
             /**
