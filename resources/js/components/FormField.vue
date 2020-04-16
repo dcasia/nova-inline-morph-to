@@ -68,7 +68,7 @@
              * Set the initial, internal value for the field.
              */
             setInitialValue() {
-                this.value = this.field.value || this.field.default || null
+                this.value = this.field.value || null
             },
 
             /**
