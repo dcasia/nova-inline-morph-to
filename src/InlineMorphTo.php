@@ -2,7 +2,7 @@
 
 namespace DigitalCreative\InlineMorphTo;
 
-use App\Nova\Resource;
+use Laravel\Nova\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Laravel\Nova\Fields\BelongsToMany;
