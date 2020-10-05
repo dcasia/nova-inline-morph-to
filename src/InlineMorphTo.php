@@ -70,7 +70,7 @@ class InlineMorphTo extends Field
             return [
                 'className' => $resource,
                 'uriKey' => $resource::uriKey(),
-                'label' => is_numeric($key) ? $resource::label() : $key,
+                'label' => $resource::label() ? $resource::label() : $key,
                 'fields' => $this->resolveFields($resourceInstance)
             ];
 
