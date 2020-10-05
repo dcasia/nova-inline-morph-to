@@ -70,7 +70,7 @@ class InlineMorphTo extends Field
             return [
                 'className' => $resource,
                 'uriKey' => $resource::uriKey(),
-                'label' => $resource::label() ? $resource::label() : $key,
+                'label' => method_exists($resourceInstance, 'dynamicLabel') ? $resourceInstance->dynamicLabel() : ($resource::label() ? $resource::label() : $key),
                 'fields' => $this->resolveFields($resourceInstance)
             ];
 
