@@ -39,14 +39,12 @@ class InlineMorphTo extends Field
      */
     public function __construct($name, $attribute = null, callable $resolveCallback = null)
     {
-
         parent::__construct($name, $attribute, $resolveCallback);
 
         $this->meta = [
             'resources' => [],
             'listable' => true
         ];
-
     }
 
 
@@ -56,7 +54,7 @@ class InlineMorphTo extends Field
      * @param bool $value
      * @return $this
      */
-    public function typeUpdateable($value = true)
+    public function typeUpdateable($value = true): InlineMorphTo
     {
         $this->typeUpdateable = $value;
 
@@ -75,7 +73,6 @@ class InlineMorphTo extends Field
      */
     public function types(array $types): self
     {
-
         $types = collect($types)->map(function (string $resource, $key) {
 
             /**
@@ -89,13 +86,11 @@ class InlineMorphTo extends Field
                 'label' => is_numeric($key) ? $resource::label() : $key,
                 'fields' => $this->resolveFields($resourceInstance)
             ];
-
         });
 
         $this->withMeta(['resources' => $types->values()]);
 
         return $this;
-
     }
 
     private function resolveFields(Resource $resourceInstance): Collection
@@ -109,22 +104,21 @@ class InlineMorphTo extends Field
 
         switch (get_class($controller)) {
 
-            case CreationFieldController::class :
+            case CreationFieldController::class:
                 return $resourceInstance->creationFields($request);
 
-            case UpdateFieldController::class :
+            case UpdateFieldController::class:
                 return $resourceInstance->updateFields($request);
 
-            case ResourceShowController::class :
+            case ResourceShowController::class:
                 return $resourceInstance->detailFields($request);
 
-            case ResourceIndexController::class :
+            case ResourceIndexController::class:
                 return $resourceInstance->indexFields($request);
 
         }
 
         return $resourceInstance->availableFields($request);
-
     }
 
     /**
@@ -146,15 +140,10 @@ class InlineMorphTo extends Field
         parent::resolveForDisplay($resource, $attribute);
 
         if ($relationInstance = $resource->$attribute) {
-
             foreach ($this->getFields($relationInstance) as $field) {
-
                 $field->resolveForDisplay($relationInstance);
-
             }
-
         }
-
     }
 
     /**
@@ -176,23 +165,16 @@ class InlineMorphTo extends Field
         parent::resolve($resource, $attribute);
 
         if ($relationInstance = $resource->$attribute) {
-
             foreach ($this->getFields($relationInstance) as $field) {
-
                 if ($field->computed()) {
-
                     $field->computedCallback = $field->computedCallback->bindTo(
                         Nova::newResourceFromModel($relationInstance)
                     );
-
                 }
 
                 $field->resolve($relationInstance);
-
             }
-
         }
-
     }
 
     /**
@@ -211,28 +193,21 @@ class InlineMorphTo extends Field
          */
 
         if ($relationInstance = $resource->$attribute) {
-
             $resource = Nova::resourceForModel($relationInstance);
 
             foreach ($this->getFields($relationInstance) as $field) {
-
                 if ($field instanceof HasOne ||
                     $field instanceof HasMany ||
                     $field instanceof BelongsToMany) {
-
                     $field->meta['inlineMorphTo'] = [
                         'viaResourceId' => $relationInstance->id,
                         'viaResource' => $resource::uriKey()
                     ];
-
                 }
-
             }
 
             return $resource;
-
         }
-
     }
 
     public function fill(NovaRequest $request, $model)
@@ -247,18 +222,15 @@ class InlineMorphTo extends Field
         $resourceClass = $request->input($this->attribute);
 
         if ($this->typeUpdateable) {
-
-            if (get_class($model->{$this->attribute}) == $resourceClass::newModel()) {
+            if ($model->{$this->attribute} !== null && get_class($model->{$this->attribute}) == $resourceClass::newModel()) {
                 // same related model
                 $relatedInstance = $model->{$this->attribute};
             } else {
                 // model has changed
                 $relatedInstance = $resourceClass::newModel();
             }
-
         } else {
             $relatedInstance = $model->{$this->attribute} ?? $resourceClass::newModel();
-
         }
 
 
@@ -266,42 +238,29 @@ class InlineMorphTo extends Field
 
 
         if ($relatedInstance->exists) {
-
             $resource->validateForUpdate($request);
-
         } else {
-
             $resource->validateForCreation($request);
-
         }
 
         $fields = $this->getFields($relatedInstance);
         $callbacks = [];
 
         foreach ($fields as $field) {
-
             $callbacks[] = $field->fill($request, $relatedInstance);
-
         }
 
-        $a = $relatedInstance->saveOrFail();
+        $relatedInstance->saveOrFail();
         $model->{$this->attribute}()->associate($relatedInstance);
 
 
         return function () use ($callbacks) {
-
             foreach ($callbacks as $callback) {
-
                 if (is_callable($callback)) {
-
                     call_user_func($callback);
-
                 }
-
             }
-
         };
-
     }
 
     private function getFields(Model $model): Collection
@@ -311,7 +270,7 @@ class InlineMorphTo extends Field
         return $this->meta['resources']->where('className', $resourceClass)->first()['fields'];
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
 
         /**
@@ -324,21 +283,15 @@ class InlineMorphTo extends Field
          * Temporarily remap the route resource key so every sub field thinks its being resolved by its original parent
          */
         foreach ($this->meta['resources'] as $resource) {
-
             $resource['fields'] = $resource['fields']->transform(function ($field) use ($request, $resource) {
-
                 $request->route()->setParameter('resource', $resource['uriKey']);
 
                 return $field->jsonSerialize();
-
             });
-
         }
 
         $request->route()->setParameter('resource', $originalResource);
 
         return parent::jsonSerialize();
-
     }
-
 }
