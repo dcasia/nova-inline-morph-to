@@ -26,6 +26,8 @@ class InlineMorphTo extends Field
      */
     public $component = 'inline-morph-to';
 
+    public $typeUpdateable = false;
+
     /**
      * Create a new field.
      *
@@ -45,6 +47,20 @@ class InlineMorphTo extends Field
             'listable' => true
         ];
 
+    }
+
+
+    /**
+     * Specify if a relation can be changed.
+     *
+     * @param bool $value
+     * @return $this
+     */
+    public function typeUpdateable($value = true)
+    {
+        $this->typeUpdateable = $value;
+
+        return $this;
     }
 
     /**
@@ -76,7 +92,7 @@ class InlineMorphTo extends Field
 
         });
 
-        $this->withMeta([ 'resources' => $types->values() ]);
+        $this->withMeta(['resources' => $types->values()]);
 
         return $this;
 
@@ -204,7 +220,7 @@ class InlineMorphTo extends Field
                     $field instanceof HasMany ||
                     $field instanceof BelongsToMany) {
 
-                    $field->meta[ 'inlineMorphTo' ] = [
+                    $field->meta['inlineMorphTo'] = [
                         'viaResourceId' => $relationInstance->id,
                         'viaResource' => $resource::uriKey()
                     ];
@@ -228,10 +244,26 @@ class InlineMorphTo extends Field
          * @var Resource $resource
          * @var Field $field
          */
-
         $resourceClass = $request->input($this->attribute);
-        $relatedInstance = $model->{$this->attribute} ?? $resourceClass::newModel();
+
+        if ($this->typeUpdateable) {
+
+            if (get_class($model->{$this->attribute}) == $resourceClass::newModel()) {
+                // same related model
+                $relatedInstance = $model->{$this->attribute};
+            } else {
+                // model has changed
+                $relatedInstance = $resourceClass::newModel();
+            }
+
+        } else {
+            $relatedInstance = $model->{$this->attribute} ?? $resourceClass::newModel();
+
+        }
+
+
         $resource = new $resourceClass($relatedInstance);
+
 
         if ($relatedInstance->exists) {
 
@@ -252,9 +284,9 @@ class InlineMorphTo extends Field
 
         }
 
-        $relatedInstance->saveOrFail();
-
+        $a = $relatedInstance->saveOrFail();
         $model->{$this->attribute}()->associate($relatedInstance);
+
 
         return function () use ($callbacks) {
 
@@ -276,7 +308,7 @@ class InlineMorphTo extends Field
     {
         $resourceClass = Nova::resourceForModel($model);
 
-        return $this->meta[ 'resources' ]->where('className', $resourceClass)->first()[ 'fields' ];
+        return $this->meta['resources']->where('className', $resourceClass)->first()['fields'];
     }
 
     public function jsonSerialize()
@@ -291,11 +323,11 @@ class InlineMorphTo extends Field
         /**
          * Temporarily remap the route resource key so every sub field thinks its being resolved by its original parent
          */
-        foreach ($this->meta[ 'resources' ] as $resource) {
+        foreach ($this->meta['resources'] as $resource) {
 
-            $resource[ 'fields' ] = $resource[ 'fields' ]->transform(function ($field) use ($request, $resource) {
+            $resource['fields'] = $resource['fields']->transform(function ($field) use ($request, $resource) {
 
-                $request->route()->setParameter('resource', $resource[ 'uriKey' ]);
+                $request->route()->setParameter('resource', $resource['uriKey']);
 
                 return $field->jsonSerialize();
 
