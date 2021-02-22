@@ -222,7 +222,7 @@ class InlineMorphTo extends Field
         $resourceClass = $request->input($this->attribute);
 
         if ($this->typeUpdateable) {
-            if ($model->{$this->attribute} !== null && get_class($model->{$this->attribute}) == $resourceClass::newModel()) {
+            if ($model->{$this->attribute} !== null && get_class($model->{$this->attribute}) == get_class($resourceClass::newModel())) {
                 // same related model
                 $relatedInstance = $model->{$this->attribute};
             } else {
