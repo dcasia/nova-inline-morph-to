@@ -16,7 +16,7 @@ trait HasInlineMorphToFields
      *
      * @return Collection
      */
-    public function detailFields(NovaRequest $request)
+    public function detailFields(NovaRequest $request): Collection
     {
 
         return tap(parent::detailFields($request)->flatten())->each(function ($field) {

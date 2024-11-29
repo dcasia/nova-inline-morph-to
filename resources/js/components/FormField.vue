@@ -1,51 +1,82 @@
 <template>
 
-    <div>
+    <div class="inline-morph-to">
 
-        <default-field :field="field" :errors="errors">
+        <DefaultField
+            :field="currentField"
+            :show-errors="false"
+            :field-name="fieldName"
+            :show-help-text="showHelpText"
+            :full-width-content="fullWidthContent">
 
-            <template slot="field">
+            <template #field>
 
-                <select :id="field.attribute"
-                        v-model="value"
-                        :disabled="shouldDisableTypeSelect"
-                        class="w-full form-control form-select"
-                        :class="errorClasses">
+                <div v-if="hasMorphToTypes" class="flex relative">
 
-                    <option selected disabled :value="null">
-                        {{__('Choose an option')}}
-                    </option>
+                    <select :disabled="(viaRelatedResource && !shouldIgnoresViaRelatedResource) || currentlyIsReadonly"
+                            :dusk="`${field.attribute}-type`"
+                            :value="resourceType"
+                            @change="refreshResourcesForTypeChange"
+                            class="block w-full form-control form-input form-control-bordered form-input mb-3">
 
-                    <option v-for="resource in field.resources"
-                            :value="resource.className"
-                            :selected="resource.className === value">
+                        <option value="" selected :disabled="!currentField.nullable">
+                            {{ __('Choose Type') }}
+                        </option>
 
-                        {{ resource.label }}
+                        <option
+                            v-for="option in currentField.morphToTypes"
+                            :key="option.value"
+                            :value="option.value"
+                            :selected="resourceType === option.value">
 
-                    </option>
+                            {{ option.singularLabel }}
 
-                </select>
+                        </option>
 
-                <p v-if="hasError" class="my-2 text-danger">
-                    {{ firstError }}
-                </p>
+                    </select>
+
+                    <IconArrow class="pointer-events-none absolute text-gray-700 top-[15px] right-[11px]"/>
+
+                </div>
+
+                <label v-else class="flex items-center select-none mt-2">
+                    {{ __('There are no available options for this resource.') }}
+                </label>
 
             </template>
 
-        </default-field>
+        </DefaultField>
 
-        <div v-for="resource in field.resources" v-if="resource.className === value">
+        <Card class="divide-y divide-gray-100 dark:divide-gray-700" v-if="availableResources">
 
-            <div v-for="resourceField in resource.fields">
+            <component
+                v-for="(field, index) in availableResources.fields"
+                ref="items"
+                :index="index"
+                :key="`${ field.attribute }_${ index }`"
+                :is="`form-${field.component}`"
+                :errors="errors"
+                :resource-id="resourceId"
+                :resource-name="resourceType"
+                :related-resource-name="relatedResourceName"
+                :related-resource-id="relatedResourceId"
+                :field="field"
+                :via-resource="viaResource"
+                :via-resource-id="viaResourceId"
+                :via-relationship="viaRelationship"
+                :shown-via-new-relation-modal="shownViaNewRelationModal"
+                :form-unique-id="formUniqueId"
+                :mode="mode"
+                @field-shown="handleFieldShown"
+                @field-hidden="handleFieldHidden"
+                @field-changed="$emit('field-changed')"
+                @file-deleted="handleFileDeleted"
+                @file-upload-started="$emit('file-upload-started')"
+                @file-upload-finished="$emit('file-upload-finished')"
+                :show-help-text="showHelpText"
+            />
 
-                <component :is="`form-${ resourceField.component }`"
-                           :resource-name="resource.uriKey"
-                           :field="resourceField"
-                           :errors="errors"/>
-
-            </div>
-
-        </div>
+        </Card>
 
     </div>
 
@@ -53,49 +84,53 @@
 
 <script>
 
-    import { FormField, HandlesValidationErrors } from 'laravel-nova'
+    import MorphToField from '@/fields/Form/MorphToField'
 
     export default {
-        mixins: [ FormField, HandlesValidationErrors ],
-        props: [ 'resourceName', 'resourceId', 'field' ],
-        computed: {
-            shouldDisableTypeSelect() {
-                return this.resourceId
-            }
-        },
+        extends: MorphToField,
         methods: {
-            /*
-             * Set the initial, internal value for the field.
-             */
-            setInitialValue() {
-                this.value = this.field.value || null
-            },
+            async refreshResourcesForTypeChange(event) {
 
-            /**
-             * Fill the given FormData object with the field's internal value.
-             */
-            async fill(formData) {
+                this.resourceType = event?.target?.value ?? event
 
-                formData.append(this.field.attribute, this.value)
+                this.availableResources = []
+                this.selectedResource = ''
+                this.selectedResourceId = ''
+                this.withTrashed = false
 
-                this.$children.forEach(component => {
+                this.softDeletes = false
+                this.determineIfSoftDeletes()
 
-                    if (component.field.attribute !== this.field.attribute) {
+                if (!this.isSearchable && this.resourceType) {
 
-                        component.field.fill(formData)
-
+                    if (this.field.morphToType === this.resourceType) {
+                        this.selectedResourceId = this.field.morphToId
                     }
 
-                })
+                    this.getAvailableResources().then(() => {
+
+                        this.emitFieldValueChange(`${ this.fieldAttribute }_type`, this.resourceType)
+                        this.emitFieldValueChange(this.fieldAttribute, null)
+
+                    })
+
+                }
 
             },
+            fill(formData) {
 
-            /**
-             * Update the field's internal value.
-             */
-            handleChange(value) {
-                this.value = value
-            }
-        }
+                for (const field of this.$refs.items) {
+                    field.fill(formData)
+                }
+
+                if (this.field.morphToType === this.resourceType) {
+                    this.fillIfVisible(formData, `${ this.fieldAttribute }__key`, this.field.morphToId)
+                }
+
+                this.fillIfVisible(formData, `${ this.fieldAttribute }_type`, this.resourceType)
+
+            },
+        },
     }
+
 </script>
