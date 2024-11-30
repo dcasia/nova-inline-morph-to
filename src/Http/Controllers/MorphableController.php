@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace DigitalCreative\InlineMorphTo\Http\Controllers;
 
-use DigitalCreative\InlineMorphTo\InlineMorphTo;
 use Illuminate\Support\Str;
 use Laravel\Nova\Contracts\RelatableField;
 use Laravel\Nova\Http\Controllers\MorphableController as BaseMorphableController;
@@ -24,7 +23,7 @@ class MorphableController extends BaseMorphableController
         $request->newResource()
             ->availableFieldsOnIndexOrDetail($request)
             ->whereInstanceOf(RelatableField::class)
-            ->findFieldByAttribute($relationKey, fn() => abort(404))
+            ->findFieldByAttribute($relationKey, fn () => abort(404))
             ->applyDependsOn($request);
 
         $resource = Nova::resourceInstanceForKey($request->type);
@@ -44,7 +43,9 @@ class MorphableController extends BaseMorphableController
 
             }
 
-        } else if ($request->isCreateOrAttachRequest()) {
+        }
+
+        if ($request->isCreateOrAttachRequest()) {
 
             $fields = $resource->creationFieldsWithinPanels($request)->applyDependsOnWithDefaultValues($request);
 

@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace DigitalCreative\InlineMorphTo;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
+use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\MorphTo;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Requests\ResourceDetailRequest;
 use Laravel\Nova\Http\Requests\ResourceUpdateOrUpdateAttachedRequest;
 use Laravel\Nova\Http\Resources\DetailViewResource;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Nova\Fields\Field;
-use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Http\Resources\UpdateViewResource;
 use Laravel\Nova\Nova;
 
@@ -30,16 +32,15 @@ class InlineMorphTo extends MorphTo
 
             $rules = $resource
                 ->creationFields($request)
-                ->flatMap(fn(Field $field) => $field->getRules($request))
-                ->mapWithKeys(fn(array $rules, string $attribute) => [
+                ->flatMap(fn (Field $field) => $field->getCreationRules($request))
+                ->mapWithKeys(fn (array $rules, string $attribute) => [
                     $this->attribute . '__' . $attribute => $rules,
                 ]);
 
         }
 
-
         return [
-            $attribute => [$this->nullable ? 'nullable' : 'required', 'in:' . $possibleTypes->implode(',')],
+            $attribute => [ $this->nullable ? 'nullable' : 'required', 'in:' . $possibleTypes->implode(',') ],
             ...$rules,
         ];
     }
@@ -54,8 +55,8 @@ class InlineMorphTo extends MorphTo
 
             $attributes = $request
                 ->collect()
-                ->filter(fn(mixed $value, string $key) => Str::startsWith($key, $prefix))
-                ->mapWithKeys(fn(mixed $value, string $key) => [
+                ->filter(fn (mixed $value, string $key) => Str::startsWith($key, $prefix))
+                ->mapWithKeys(fn (mixed $value, string $key) => [
                     Str::after($key, $prefix) => $value,
                 ]);
 
@@ -146,13 +147,13 @@ class InlineMorphTo extends MorphTo
 
                 $this->value = UpdateViewResource::make()->toArray($request);
 
-                foreach ($this->value['fields'] as $field) {
+                foreach ($this->value[ 'fields' ] as $field) {
                     $field->attribute = $this->attribute . '__' . $field->attribute;
                 }
 
             }
 
-            [$this->morphToId, $this->morphToType] = [
+            [ $this->morphToId, $this->morphToType ] = [
                 optional($value)->getKey(),
                 $this->resolveMorphType($resource),
             ];

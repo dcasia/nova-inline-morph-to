@@ -14,7 +14,7 @@
                 <div v-if="hasMorphToTypes" class="flex relative">
 
                     <select :disabled="(viaRelatedResource && !shouldIgnoresViaRelatedResource) || currentlyIsReadonly"
-                            :dusk="`${field.attribute}-type`"
+                            :dusk="`${ field.attribute }-type`"
                             :value="resourceType"
                             @change="refreshResourcesForTypeChange"
                             class="block w-full form-control form-input form-control-bordered form-input mb-3">

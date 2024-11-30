@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace DigitalCreative\InlineMorphTo;
 
 use Illuminate\Support\Facades\Route;
@@ -26,8 +28,8 @@ class FieldServiceProvider extends ServiceProvider
             return;
         }
 
-        Route::middleware(['nova'])
+        Route::middleware([ 'nova' ])
             ->prefix('nova-vendor/inline-morph-to')
-            ->group(__DIR__.'/../routes/api.php');
+            ->group(__DIR__ . '/../routes/api.php');
     }
 }
