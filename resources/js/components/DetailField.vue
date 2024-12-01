@@ -1,65 +1,49 @@
 <template>
 
-    <div>
+    <PanelItem :index="index" :field="field" :field-name="field.name">
 
-        <panel :panel="{ name: label, fields: standardFields }"/>
+        <template #value>
 
-        <template v-for="({type, fields}) of relationalFields">
+            <div v-for="({ fields }) in field.value.panels" class="mb-4">
 
-            <resource-index v-for="(relationField, index) of fields"
-                            :key="index"
-                            :field="relationField"
-                            :resource-name="relationField.resourceName"
-                            :via-resource="relationField.inlineMorphTo.viaResource"
-                            :via-resource-id="relationField.inlineMorphTo.viaResourceId"
-                            :via-relationship="relationField[`${type}Relationship`]"
-                            :relationship-type="type"
-                            :load-cards="false"
-                            class="mb-6"/>
+                <div v-if="fields.length > 0" :class="[
+                    'relative overflow-hidden bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow',
+                    'py-2 px-6 divide-y divide-gray-100 dark:divide-gray-700'
+                ]">
+
+                    <component
+                        :key="index"
+                        v-for="(field, index) in fields"
+                        :index="index"
+                        :is="resolveComponentName(field)"
+                        :field="field"
+                    />
+
+                </div>
+
+            </div>
 
         </template>
 
-    </div>
+    </PanelItem>
 
 </template>
 
 <script>
 
-    import ReplaceValueWithLabel from '../ReplaceValueWithLabel'
+    import isNil from 'lodash/isNil'
+    import PanelItem from './PanelItem'
 
     export default {
-        props: [ 'resource', 'resourceName', 'resourceId', 'field' ],
-        mixins: [ ReplaceValueWithLabel ],
-        computed: {
-            relationalFields() {
-
-                return [
-                    {
-                        type: 'hasOne',
-                        fields: this.fields.filter(field => field.component === 'has-one-field')
-                    },
-                    {
-                        type: 'hasMany',
-                        fields: this.fields.filter(field => field.component === 'has-many-field')
-                    },
-                    {
-                        type: 'belongsToMany',
-                        fields: this.fields.filter(field => field.component === 'belongs-to-many-field')
-                    }
-                ]
-
+        props: [ 'index', 'resource', 'resourceName', 'resourceId', 'field' ],
+        components: { PanelItem },
+        methods: {
+            resolveComponentName(panel) {
+                return isNil(panel.prefixComponent) || panel.prefixComponent
+                    ? 'detail-' + panel.component
+                    : panel.component
             },
-            standardFields() {
-
-                return this.fields.filter(field => ![ 'has-one-field', 'has-many-field', 'belongs-to-many-field' ].includes(field.component))
-
-            },
-            fields() {
-
-                return this.field.resources.find(resource => resource.className === this.originalValue).fields
-
-            }
-        }
+        },
     }
 
 </script>

@@ -4,11 +4,16 @@
 
 <script>
 
-    import ReplaceValueWithLabel from '../ReplaceValueWithLabel'
-
     export default {
-        props: [ 'resourceName', 'field' ],
-        mixins: [ ReplaceValueWithLabel ]
+        props: [ 'field' ],
+        computed: {
+            label() {
+                return this.field
+                    .morphToTypes
+                    .find(element => element.value === this.field.morphToType)
+                    ?.display
+            }
+        }
     }
 
 </script>

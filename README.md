@@ -18,34 +18,25 @@ The signature is the same as the default `MorphTo` field that ships with Nova.
 
 ```php
 use DigitalCreative\InlineMorphTo\InlineMorphTo;
-use DigitalCreative\InlineMorphTo\HasInlineMorphToFields;
 
 class Article extends Resource
 {
-    use HasInlineMorphToFields;
-
     public function fields(Request $request)
     {
         return [
             ...
-            InlineMorphTo::make('Template')
-                         ->types([
-                             \App\Nova\Video::class,
-                             \App\Nova\Image::class,
-                             \App\Nova\Text::class,
-                             \App\Nova\Gallery::class,
-                         ])
-                         ->default(\App\Nova\Text::class),
+            InlineMorphTo::make('Template')->types([
+                \App\Nova\Video::class,
+                \App\Nova\Image::class,
+                \App\Nova\Text::class,
+                \App\Nova\Gallery::class,
+            ]),
             ...
         ];
 
     }
 }
 ```
-
-**_Note:_** You will need to import the `HasInlineMorphToFields` trait for this field to display correctly within resource detail views.
-
-**_Code example_**: adding morphables dynamically from a directory [#4](https://github.com/dcasia/nova-inline-morph-to/issues/4)
 
 ## License
 
